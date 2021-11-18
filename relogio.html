@@ -1,0 +1,275 @@
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+  integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+  integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relógio</title>
+  </head>
+  <style>
+  body {
+    background-color: rgba(33, 10, 136, 0.76);
+    font-size: 17px;
+  }
+  #conteiner{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        margin: auto;
+        text-align: center;
+        height: 210px;
+
+  }
+  .cima:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    width: 0;
+    height: 0;
+
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid black;
+  }
+
+  .baixo:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    width: 0;
+    height: 0;
+
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #f00;
+  }
+  </style>
+
+  <body>
+    <div id='conteiner'>
+      <div id='timer-label'>
+
+      </div>
+      <div id='time-left'>
+        25:00
+      </div>
+      <div id='time'>
+    
+      </div>
+    </div>
+    <audio id='beep' src=''>
+    </audio>
+  </body>
+  <script type='text/babel'>
+  var segundos = '00'
+  var minutos = 25
+  var tempo = minutos + ':' + segundos
+  var local = document.querySelector('#time-left')
+  local.textContent = tempo
+  var dado = 'session'
+  var sp = 'pause'
+  var quant
+  var numeros
+  var numerob
+  var audio = document.getElementById('beep')
+
+  class Relogio extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        numerob: 5,
+        numeros: 25
+      }
+      this.breakup = this.breakup.bind(this)
+      this.breakdow = this.breakdow.bind(this)
+      this.sessionup = this.sessionup.bind(this)
+      this.sessiondow = this.sessiondow.bind(this)
+      this.replay2 = this.replay2.bind(this)
+    }
+    breakup() {
+      if(sp == 'play'){
+        return
+      }
+      segundos = 0
+      this.setState(state => ({
+        numerob: state.numerob += 1
+      }))
+      if(dado == 'break'){
+        local.textContent = (this.state.numerob + 1 == 61? 60 : this.state.numerob + 1 < 10 ? '0' + (this.state.numerob + 1) : this.state.numerob + 1) + ':00'
+      }
+    }
+
+    breakdow() {
+      if(sp == 'play'){
+        return
+      }
+      segundos = 0
+      this.setState(state => ({
+        numerob: state.numerob -= 1
+      }))
+      if(dado == 'break'){
+        local.textContent = (this.state.numerob - 1 == 0 ? '0' + 1 : this.state.numerob - 1 < 10 ? '0' + (this.state.numerob - 1) : this.state.numerob - 1) + ':00'
+      }
+    }
+
+    sessionup() {
+      if(sp == 'play'){
+        return
+      }
+      segundos = 0
+      this.setState(state => ({
+        numeros: state.numeros += 1
+      }))      
+      if(dado == 'session'){
+        local.textContent = (this.state.numeros + 1 == 61 ? 60 : this.state.numeros + 1 < 10 ? '0' + (this.state.numeros + 1) : this.state.numeros + 1) + ':00'
+      }
+    }
+
+    sessiondow() {
+      if(sp == 'play'){
+        return
+      }
+      segundos = 0
+      this.setState(state => ({
+        numeros: state.numeros -= 1
+      }))
+      if(dado == 'session'){
+        local.textContent = (this.state.numeros - 1 == 0 ? '0' + 1 : this.state.numeros - 1 < 10 ? '0' + (this.state.numeros - 1) : this.state.numeros - 1) + ':00'
+      }
+    }
+
+    replay2() {
+      minutos = 25
+      segundos = 1
+      dado = 'session' 
+      this.setState((state) => ({
+        numerob: 5,
+        numeros: 25
+      }))
+      sp = 'pause'
+      ReactDOM.render(<Dado />, document.getElementById('timer-label'))
+      clearInterval(quant)
+      local.textContent = '25:00'
+      audio.currentTime = 0
+    }
+
+    start_pause() {
+      if(sp == 'play'){
+        sp = 'pause'
+        clearInterval(quant)
+      } else {
+        sp = 'play'    
+        quant = setInterval(function d(){ 
+
+      if(segundos == '00'){
+        Number.parseInt(minutos--)
+        segundos = 59
+      } else {
+        Number.parseInt(segundos--)
+      }
+
+      segundos = segundos < 10 ? '0' + segundos : segundos
+      tempo = minutos < 10 ? '0' + minutos  + ':' + segundos : minutos + ':' + segundos
+      local.textContent = tempo
+    
+      if(tempo == '00:00'){
+        if(dado == 'session'){
+          minutos = numerob
+          segundos = 1  
+          dado = 'break'
+          ReactDOM.render(<Dado />, document.getElementById('timer-label'))
+        } else {
+          minutos = numeros
+          segundos = 1
+          dado = 'session'
+          ReactDOM.render(<Dado />, document.getElementById('timer-label'))
+        }
+        audio.play()
+      }
+        }, 1000)
+      }
+    }
+
+    render() {
+      if (this.state.numerob < 1) {
+        this.state.numerob = 1
+      }
+      else if (this.state.numerob > 60) {
+        this.state.numerob = 60
+      }
+      if (this.state.numeros < 1) {
+        this.state.numeros = 1
+      }
+      else if (this.state.numeros > 60) {
+        this.state.numeros = 60
+      }
+      if(dado == 'session'){
+        minutos = this.state.numeros
+      } else {
+        minutos = this.state.numerob
+      }
+      numeros = this.state.numeros
+      numerob = this.state.numerob
+      return (
+        <>
+        <p id='break-label'>
+        Break
+        </p>
+          <label id='break-length'>
+            {this.state.numerob}
+          </label>
+          <br />
+          <button onClick={this.breakup} class='bnt cima' id='break-increment'>
+
+          </button>
+          <button onClick={this.breakdow} class='bnt baixo' id='break-decrement'>
+
+          </button>
+
+          <p id='session-label'>
+        Session
+        </p>
+          <label id='session-length'>
+            {this.state.numeros}
+          </label>
+          <br />
+          <button onClick={this.sessionup} class='bnt cima' id='session-increment'>
+
+          </button>
+          <button onClick={this.sessiondow} class='bnt baixo' id='session-decrement'>
+
+          </button>
+
+          <button class='bnt' id='start_stop' onClick={this.start_pause}>Start_Pause</button> <button class='bnt' id='reset' onClick={this.replay2}>Replay</button> 
+        </>
+      )
+    }
+  }
+
+  class Dado extends React.Component { 
+    constructor(props) {
+      super(props);
+    }
+    render(){ 
+      return(
+    <p> {dado == 'session' ? 'Session' : 'Break'} </p>
+      )
+    }
+    }
+
+  ReactDOM.render(<Relogio />, document.getElementById('time'))
+  ReactDOM.render(<Dado />, document.getElementById('timer-label'))
+  </script>
+  </html>
